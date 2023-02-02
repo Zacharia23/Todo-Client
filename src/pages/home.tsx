@@ -6,7 +6,7 @@ const Home = () => {
     return (
         <Layout>
             <div className='mx-auto max-w-7xl px-6 lg:px-8 mt-10 antialiased'>
-                <div className='grid grid-cols-1 sm:grid-cols-2 gap-x-6'>
+                <div className='grid grid-cols-1 sm:grid-cols-2 gap-x-24'>
                     <NewTask/>
                     <TaskList/>
                 </div>
