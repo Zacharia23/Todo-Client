@@ -1,6 +1,7 @@
 import {ChangeEvent, Fragment, useState} from "react";
 import {Listbox, Transition} from "@headlessui/react";
 import {ChevronDownIcon, PlusIcon} from "@heroicons/react/20/solid";
+import {MinusCircleIcon} from "@heroicons/react/24/outline"
 
 const priority = [
     {id: 1, name: 'High', color: ''},
@@ -123,7 +124,7 @@ const NewTask = () => {
                     </div>
                     {taskItems.map((itm, idx) => {
                         return (
-                            <div className="relative mb-2">
+                            <div key={idx} className="relative mb-2">
                               <input
                                 type='text'
                                 key={idx}
@@ -135,7 +136,9 @@ const NewTask = () => {
                                 onChange={e => onChange(e, idx)}
                                 className='block w-full rounded-sm border-slate-200 focus:border-slate-200 focus:ring-slate-200 sm:text-sm'
                               />
-                                <button key={`btn-${idx}`} className="rounded-sm sm:text-sm absolute top-0 bottom-0 right-3" onClick={() => taskItems.length == 1 ? null : removeItem(idx)} >Remove</button>
+                                <button key={`btn-${idx}`} className="rounded-sm sm:text-sm absolute top-0 bottom-0 right-3" onClick={() => taskItems.length == 1 ? null : removeItem(idx)} >
+                                    <MinusCircleIcon className='h-5 w-5 text-red-500' />
+                                </button>
                             </div>
                         )
                     })}
