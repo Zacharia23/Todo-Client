@@ -1,6 +1,73 @@
-import {Link} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
+import {useState} from "react";
+import axios from "axios";
+import {useForm, SubmitHandler, set} from "react-hook-form";
 
+type Inputs = {
+    fullName: string,
+    userName: string,
+    email: string,
+    password: string
+}
 const Register = () => {
+    const navigate = useNavigate();
+    const [fullName, setFullName] = useState<any | null>();
+    const [userName, setUsername] = useState<any | null>();
+    const [email, setEmail] = useState<any | null>();
+    const [password, setPassword] = useState<any | null>();
+    const [loading, setLoading] = useState<any | null>(false);
+    const [message, setMessage] = useState<any | null>();
+
+    const {register, handleSubmit, watch, formState: {errors}} = useForm<Inputs>()
+
+    const onSubmit: SubmitHandler<Inputs> = async () => {
+        setLoading(true)
+        const data = JSON.stringify({
+            "name": fullName,
+            "username": userName,
+            "email": email,
+            "password" : password,
+            "roles" : ["user", "moderator"]
+        })
+
+        const config = {
+            method: 'POST',
+            url: 'http://localhost:8000/api/v1/register_user',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            data: data
+        }
+
+        try {
+            axios(config).then( async (response) => {
+                setLoading(false)
+                console.log(response)
+                if(response.status == 200) {
+                    const registerData = response.data;
+                    console.log(registerData.message)
+                    setMessage(registerData.message)
+
+                    setTimeout(() => {
+                        navigate('/')
+                    }, 2000)
+
+                } else {
+                    setMessage(`Registration Failed`)
+                    console.log(response.status)
+                }
+            }).catch(error => {
+                setMessage(`Registration Failed`)
+                console.log(error)
+            })
+
+        } catch (error) {
+            setLoading(false)
+            setMessage(`Registration Failed`)
+            console.log(error)
+        }
+    }
+
     return (
         <div className='flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8 antialiased'>
             <div className='sm:mx-auto sm:w-full sm:max-w-md'>
@@ -13,7 +80,7 @@ const Register = () => {
             </div>
             <div className='mt-8 sm:mx-auto sm:w-full sm:max-w-md'>
                 <div className='bg-white py-4 px-2 shadow sm:rounded-md sm:px-5'>
-                    <form className='space-y-6' action='#' method='POST'>
+                    <form className='space-y-6' onSubmit={handleSubmit(onSubmit)}>
                         <div className='grid grid-cols-1 sm:grid-cols-2 gap-x-3'>
                             <div>
                                 <label htmlFor='full-name' className='block text-sm font-normal text-gray-700'> Full Name </label>
@@ -25,6 +92,8 @@ const Register = () => {
                                         autoComplete="text"
                                         required
                                         placeholder='Enter full name'
+                                        value={fullName}
+                                        onChange={e => {setFullName(e.currentTarget.value)}}
                                         className='block w-full appearance-none rounded-sm border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-slate-500 focus:outline-none focus:ring-slate-500 sm:text-sm'
                                     />
                                 </div>
@@ -39,6 +108,8 @@ const Register = () => {
                                         autoComplete="text"
                                         required
                                         placeholder='Enter username'
+                                        value={userName}
+                                        onChange={e => {setUsername(e.currentTarget.value)}}
                                         className='block w-full appearance-none rounded-sm border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-slate-500 focus:outline-none focus:ring-slate-500 sm:text-sm'
                                     />
                                 </div>
@@ -55,6 +126,8 @@ const Register = () => {
                                     autoComplete="email"
                                     required
                                     placeholder='Enter email address'
+                                    value={email}
+                                    onChange={e => {setEmail(e.currentTarget.value)}}
                                     className='block w-full appearance-none rounded-sm border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-slate-500 focus:outline-none focus:ring-slate-500 sm:text-sm'
                                 />
                             </div>
@@ -71,22 +144,8 @@ const Register = () => {
                                     autoComplete="current-password"
                                     required
                                     placeholder='Enter password'
-                                    className='block w-full appearance-none rounded-sm border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-slate-500 focus:outline-none focus:ring-slate-500 sm:text-sm'
-                                />
-                            </div>
-                        </div>
-                        <div>
-                            <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700">
-                                Confirm Password
-                            </label>
-                            <div className='mt-1'>
-                                <input
-                                    id="confirm-password"
-                                    name="confirm-password"
-                                    type="password"
-                                    autoComplete="current-password"
-                                    required
-                                    placeholder='Enter password to confirm'
+                                    value={password}
+                                    onChange={e => {setPassword(e.currentTarget.value)}}
                                     className='block w-full appearance-none rounded-sm border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-slate-500 focus:outline-none focus:ring-slate-500 sm:text-sm'
                                 />
                             </div>

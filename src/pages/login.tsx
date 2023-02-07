@@ -1,10 +1,76 @@
 import {LockClosedIcon} from "@heroicons/react/20/solid";
 import {Link, useNavigate} from "react-router-dom";
+import {SubmitHandler, useForm} from "react-hook-form";
+import axios from "axios";
+import {useState} from "react";
+import useStorage from "../hooks/use-storage";
 
+type Inputs = {
+    userName: string,
+    loginPass: string
+}
+const getToken = () => {
+    return useStorage().getItem("token");
+}
 const Login = () => {
+
     const navigate = useNavigate();
-    const handleSubmit = () => {
-        navigate('/home')
+    const {setItem, getItem} = useStorage()
+    const [userName, setUsername] = useState<any | null>();
+    const [loginPass, setLoginPass] = useState<any | null>();
+    const [loading, setLoading] = useState<any | null>(false)
+    const [message, setMessage] = useState<any | null>();
+
+    const token = getToken()
+
+    const {register, handleSubmit, watch, formState: {errors}} = useForm<Inputs>()
+
+    const onSubmit: SubmitHandler<Inputs> = async () => {
+        setLoading(true)
+        const data = JSON.stringify({
+            "username": userName,
+            "password" : loginPass,
+        })
+
+        const loginConfig = {
+            method: 'POST',
+            url: 'http://localhost:8000/api/v1/user_login',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            data: data
+        }
+
+        try {
+            axios(loginConfig).then( async (loginResponse) => {
+                setLoading(false)
+                if(loginResponse.status == 200) {
+                    const loginData = loginResponse.data.data;
+
+                    setItem("token", loginData.token, "session")
+                    setItem("username", loginData.username)
+                    setItem("userId", loginData.id)
+                    setItem("email", loginData.email)
+
+                    setTimeout(() => {
+                        navigate('/home')
+                    }, 2000)
+
+
+                } else {
+                    setMessage(`Login Failed`)
+                    console.log(loginResponse.status)
+                }
+            }).catch(error => {
+                setMessage(`Login Failed`)
+                console.log(error)
+            })
+
+        } catch (error) {
+            setLoading(false)
+            setMessage(`Login Failed`)
+            console.log(error)
+        }
     }
 
     return (
@@ -18,19 +84,21 @@ const Login = () => {
                         Sign in to your account
                     </h3>
                 </div>
-                <form className="mt-8 space-y-6" action="" onSubmit={handleSubmit} method="POST">
+                <form className="mt-8 space-y-6"  onSubmit={handleSubmit(onSubmit)}>
                     <input type='hidden' name='remember' defaultValue="true" />
                     <div className='-space-y-px'>
                         <div>
-                            <label className='sr-only' htmlFor='email-address'> Email address </label>
+                            <label className='sr-only' htmlFor='user-name'> Email address </label>
                             <input
-                                id="email-address"
-                                name="email"
-                                type="email"
-                                autoComplete="email"
+                                id="user-name"
+                                name="username"
+                                type="text"
+                                autoComplete="text"
                                 required
+                                value={userName}
+                                onChange={e => {setUsername(e.currentTarget.value)}}
                                 className="relative block w-full appearance-none rounded-none rounded-t-sm border border-gray-300 px-3 py-2 text-slate-900 placeholder-slate-500 focus:z-10 focus:border-slate-500 focus:outline-none focus:ring-slate-500 sm:text-sm"
-                                placeholder="Email address"
+                                placeholder="Enter Username"
                             />
                         </div>
                         <div>
@@ -41,8 +109,10 @@ const Login = () => {
                                 type="password"
                                 autoComplete="current-password"
                                 required
+                                value={loginPass}
+                                onChange={e => {setLoginPass(e.currentTarget.value)}}
                                 className="relative block w-full appearance-none rounded-none rounded-b-sm border border-gray-300 px-3 py-2 text-slate-900 placeholder-slate-500 focus:z-10 focus:border-slate-500 focus:outline-none focus:ring-slate-500 sm:text-sm"
-                                placeholder="Password"
+                                placeholder="Enter Password"
                             />
                         </div>
                         <div className='pt-3 flex items-center justify-between'>

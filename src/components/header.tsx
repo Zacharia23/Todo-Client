@@ -2,7 +2,12 @@ import {Link} from "react-router-dom";
 import {Menu, Transition} from '@headlessui/react'
 import {ChevronDownIcon} from "@heroicons/react/20/solid";
 import {Fragment} from "react";
+import useStorage from '../hooks/use-storage'
 const Header = () => {
+
+    const userName = useStorage().getItem("username")
+    const email = useStorage().getItem("email")
+
     return (
         <div className='bg-white antialiased'>
             <nav className='mx-auto max-w-7xl px-6 lg:px-8' aria-label='Top'>
@@ -18,8 +23,8 @@ const Header = () => {
                                         <span className='flex min-w-0 items-center justify-between space-x-3'>
                                             <div className='h-10 w-10 flex-shrink rounded-full bg-gray-100' />
                                             <span className='flex min-w-0 flex-1 flex-col'>
-                                                <span className='truncate text-sm font-medium text-slate-600'>Adam F. Sandberg </span>
-                                                <span className='truncate text-sm text-slate-400'>a.sandberg</span>
+                                                <span className='truncate text-sm font-semibold text-slate-600 uppercase'>{userName} </span>
+                                                <span className='truncate text-sm text-slate-400'>{email}</span>
                                             </span>
                                         </span>
                                         <ChevronDownIcon className='h-5 w-5 ml-5 flex-shrink-0 text-gray-400 group-hover:text-gray-500' aria-hidden='true' />
